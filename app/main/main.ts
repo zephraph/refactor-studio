@@ -1,10 +1,12 @@
-const { format } = require('url')
+import { format } from 'url'
 
-const { BrowserWindow, app } = require('electron')
-const isDev = require('electron-is-dev')
-const { resolve } = require('app-root-path')
+import { BrowserWindow, app } from 'electron'
+import isDev from 'electron-is-dev'
+import { resolve } from 'app-root-path'
 
-require('dotenv').config()
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 app.on('ready', async () => {
   const mainWindow = new BrowserWindow({

@@ -1,22 +1,29 @@
-import { observable, action, set } from 'mobx'
+import { observable, action, set } from "mobx";
 
-interface IStore {
-  repositories: string[]
-  addRepositories: (repositories: string[]) => void
+interface Store {
+  repositories: string[];
+  addRepositories: (repositories: string[]) => void;
+  removeRepositories: (repositories: string[]) => void;
 }
 
-export const store = observable<IStore>(
+export const store = observable<Store>(
   {
     repositories: [],
     addRepositories(repositories: string[]) {
       set(
         store,
-        'repositories',
+        "repositories",
         Array.from(new Set([...this.repositories, ...repositories]))
-      )
+      );
+    },
+    removeRepositories(reposToRemove: string[]) {
+      const currentRepos = new Set(this.repositories);
+      reposToRemove.forEach((repo) => currentRepos.delete(repo));
+      set(store, "repositories", Array.from(currentRepos));
     }
   },
   {
-    addRepositories: action
+    addRepositories: action,
+    removeRepositories: action
   }
-)
+);
