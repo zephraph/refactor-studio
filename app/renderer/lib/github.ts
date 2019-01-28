@@ -35,7 +35,7 @@ interface ListResponse<T> {
   total_count: number;
 }
 
-const normalizeRepo = (repo: string) => {
+const normalizeRepoSearchTerm = (repo: string) => {
   const splitRepo = repo.split("/");
   return splitRepo.length > 1
     ? `user:${splitRepo[0]} ${splitRepo[1]}`
@@ -44,8 +44,27 @@ const normalizeRepo = (repo: string) => {
 
 export const searchForRepo = async (searchTerm: string) =>
   ((await github.search.repos({
-    q: `in:name ${normalizeRepo(searchTerm)}`,
+    q: `in:name ${normalizeRepoSearchTerm(searchTerm)}`,
     per_page: 5
   })) as unknown) as Promise<
     Octokit.Response<ListResponse<Octokit.ReposGetResponse>>
   >;
+
+interface GitGetTreeResponse extends Octokit.GitCreateTreeResponse {
+  truncated: boolean;
+}
+
+export const searchForFileInRepos = async (repos: string[], filename: string) =>
+  Promise.all(
+    repos
+      .map((r) => r.split("/"))
+      .map(
+        ([owner, repo]) =>
+          github.git.getTree({
+            owner,
+            repo,
+            tree_sha: "master",
+            recursive: 1
+          }) as Promise<Octokit.Response<GitGetTreeResponse>>
+      )
+  );
