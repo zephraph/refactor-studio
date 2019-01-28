@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import Router from "./router";
 
-const render = (Component) => {
+const render = Component => {
   ReactDOM.render(<Component />, document.getElementById("root"));
 };
 

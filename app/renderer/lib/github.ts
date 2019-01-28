@@ -3,6 +3,7 @@
 import Octokit from "@octokit/rest";
 import throttle from "@octokit/plugin-throttling";
 import retry from "@octokit/plugin-retry";
+import { chain, zip } from "lodash";
 
 const GithubAPI = Octokit.plugin(throttle).plugin(retry);
 
@@ -54,17 +55,33 @@ interface GitGetTreeResponse extends Octokit.GitCreateTreeResponse {
   truncated: boolean;
 }
 
-export const searchForFileInRepos = async (repos: string[], filename: string) =>
-  Promise.all(
-    repos
-      .map((r) => r.split("/"))
-      .map(
-        ([owner, repo]) =>
-          github.git.getTree({
-            owner,
-            repo,
-            tree_sha: "master",
-            recursive: 1
-          }) as Promise<Octokit.Response<GitGetTreeResponse>>
-      )
-  );
+const filterFile = filename => (
+  gitTreeResponse: Octokit.Response<GitGetTreeResponse>
+) => gitTreeResponse.data.tree.filter(({ path }) => path === filename);
+
+type RepoFileResults = [string, Octokit.GitCreateTreeResponseTreeItem[]];
+
+export const searchForFileInRepos = async (
+  repos: string[],
+  filename: string
+): Promise<RepoFileResults[]> => {
+  const responses = await chain(repos)
+    .map(r => r.split("/"))
+    .map(
+      ([owner, repo]) =>
+        github.git.getTree({
+          owner,
+          repo,
+          tree_sha: "master",
+          recursive: 1
+        }) as Promise<Octokit.Response<GitGetTreeResponse>>
+    )
+    .thru(pending => Promise.all(pending))
+    .value();
+
+  return chain(responses)
+    .tap(r => console.log(r))
+    .map(filterFile(filename))
+    .thru(repoFiles => zip(repos, repoFiles))
+    .value();
+};
