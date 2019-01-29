@@ -5,3 +5,8 @@
 .ant-steps-vertical > .ant-steps-item > .ant-steps-item-tail:after {
   background-color: #b9b9b9;
 }
+
+.ActionCard:hover {
+  border-color: #1890ff;
+  cursor: pointer;
+}
