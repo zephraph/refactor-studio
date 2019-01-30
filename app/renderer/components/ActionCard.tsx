@@ -2,23 +2,21 @@ import React from "react";
 import { Card, Icon, Button } from "antd";
 
 interface ActionCardProps {
-  name: string;
+  title: string;
   description: string;
   icon: string;
+  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 const { Meta } = Card;
 
 export const ActionCard: React.SFC<ActionCardProps> = ({
-  name,
+  title: name,
   description,
-  icon
+  icon,
+  onClick
 }) => (
-  <Card
-    size="small"
-    className="ActionCard"
-    onClick={() => console.log("Card clicked")}
-  >
+  <Card size="small" className="ActionCard" onClick={onClick}>
     <Meta
       style={{
         display: "flex",
